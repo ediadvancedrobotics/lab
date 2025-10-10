@@ -18,8 +18,6 @@ from tools import setcubeplacement
 
 def computeqgrasppose(robot, qcurrent, cube, cubetarget, viz=None):
     '''Return a collision free configuration grasping a cube at a specific location and a success flag'''
-    setcubeplacement(robot, cube, cubetarget)
-
     q = qcurrent.copy()
 
     lhand_id = robot.model.getFrameId(LEFT_HAND)
@@ -31,29 +29,30 @@ def computeqgrasppose(robot, qcurrent, cube, cubetarget, viz=None):
     success = False
 
     for i in range(1000):
-        pin.framesForwardKinematics(robot.model,robot.data,q)
-        pin.computeJointJacobians(robot.model,robot.data,q)
+        pin.framesForwardKinematics(robot.model, robot.data, q)
+        pin.computeJointJacobians(robot.model, robot.data, q)
 
         oMlhand = robot.data.oMf[lhand_id]
         oMrhand = robot.data.oMf[rhand_id]
 
         lhandMlhook = oMlhand.inverse()*oMlhook
-        lhand_nu = pin.log(lhandMlhook).vector
-
         rhandMrhook = oMrhand.inverse()*oMrhook
-        rhand_nu = pin.log(rhandMrhook).vector
+        
+        nu_L = pin.log(lhandMlhook).vector
+        nu_R = pin.log(rhandMrhook).vector
 
-        oRlhand = oMlhand.rotation
-        lhand_Jlhand = pin.computeFrameJacobian(robot.model,robot.data,q,lhand_id,pin.LOCAL_WORLD_ALIGNED)
-        o_Jlhand = pin.computeFrameJacobian(robot.model,robot.data,q,lhand_id, pin.WORLD)
+        J_L = pin.computeFrameJacobian(robot.model, robot.data, q, lhand_id, pin.LOCAL)
+        J_R = pin.computeFrameJacobian(robot.model, robot.data, q, rhand_id, pin.LOCAL)
 
-        oRrhand = oMrhand.rotation
-        rhand_Jrhand = pin.computeFrameJacobian(robot.model,robot.data,q,rhand_id,pin.LOCAL_WORLD_ALIGNED)
-        o_Jrhand = pin.computeFrameJacobian(robot.model,robot.data,q,rhand_id, pin.WORLD)
+        JL_p = pinv(J_L)
+        v1 = JL_p @ nu_L
+        N1 = np.eye(robot.nv) - JL_p @ J_L
 
-        vq = pinv(lhand_Jlhand)@lhand_nu
-        Prhand = np.eye(robot.nv)-pinv(o_Jrhand) @ o_Jrhand
-        vq += pinv(rhand_Jrhand @ Prhand) @ (o_Jlhand - o_Jrhand @ vq)
+        JRN = J_R @ N1
+        JRN_p = pinv(JRN)
+
+        v2 = JRN_p @ (nu_R - J_R @ v1)
+        vq = v1 + N1 @ v2
         
         q = pin.integrate(robot.model,q, vq)
 
@@ -62,9 +61,9 @@ def computeqgrasppose(robot, qcurrent, cube, cubetarget, viz=None):
 
         if viz:
             viz.display(q)
-            time.sleep(1e-3)
+            time.sleep(1)
         
-        if lerror < EPSILON and not collision(robot, q):
+        if lerror < EPSILON and rerror < EPSILON and not collision(robot, q):
             success = True
             break
     
