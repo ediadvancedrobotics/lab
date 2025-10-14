@@ -53,7 +53,12 @@ def computeqgrasppose(robot, qcurrent, cube, cubetarget, viz=None):
 
         v2 = JRN_p @ (nu_R - J_R @ v1)
         vq = v1 + N1 @ v2
-        
+
+        N2 = N1 - JRN_p @ JRN @ N1
+        v3 = pin.difference(robot.model, q, robot.q0)
+
+        vq += N2 @ v3
+
         q = pin.integrate(robot.model,q, vq)
 
         lerror = norm(oMlhand.translation - oMlhook.translation)
@@ -68,6 +73,7 @@ def computeqgrasppose(robot, qcurrent, cube, cubetarget, viz=None):
             break
     
     return q, success
+
             
 if __name__ == "__main__":
     from tools import setupwithmeshcat
