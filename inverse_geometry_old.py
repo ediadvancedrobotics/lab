@@ -190,9 +190,9 @@ if __name__ == "__main__":
     
     q = robot.q0.copy()
     
-    q0,successinit = computeqgrasppose(robot, q, cube, CUBE_PLACEMENT, viz)
-    updatevisuals(viz, robot, cube, q0)
+    # q0,successinit = computeqgrasppose(robot, q, cube, CUBE_PLACEMENT, viz)
+    # updatevisuals(viz, robot, cube, q0)
 
-    # qe,successend = computeqgrasppose(robot, q, cube, CUBE_PLACEMENT_TARGET,  viz)    
-    # updatevisuals(viz, robot, cube, qe)
+    qe,successend = computeqgrasppose(robot, q, cube, CUBE_PLACEMENT_TARGET,  viz)    
+    updatevisuals(viz, robot, cube, qe)
 
