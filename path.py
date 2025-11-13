@@ -33,6 +33,12 @@ def RAND_CONF(robot, cube, checkcollision=True):
     '''
 
     while True:
+        # rotation_coin = np.random.rand()
+        # if rotation_coin < 0.5:
+        #     cube_location = pin.SE3(rotate('z', 0),np.random.rand(3))
+        
+        # else:
+        #     cube_location = pin.SE3(rotate('y', np.pi/2),np.random.rand(3))
         cube_location = pin.SE3(rotate('z', 0),np.random.rand(3))
         cube_location.translation[0] *= 0.6
         cube_location.translation[1] -= 0.8
@@ -50,6 +56,7 @@ def RAND_CONF(robot, cube, checkcollision=True):
         # print(q)
 
         if success and not collision(robot, q):
+            # print(rotation_coin)
             # updatevisuals(viz, robot, cube, q)
             return q
     
@@ -120,102 +127,6 @@ def displaypath_tutorial(path):
     
 
 
-#returns a collision free path from qinit to qgoal under grasping constraints
-#the path is expressed as a list of configurations
-def computepath(robot, qinit,qgoal,cubeplacementq0, cubeplacementqgoal):
-
-    discretisationsteps_newconf = 200 #To tweak later on
-    discretisationsteps_validedge = 200 #To tweak later on
-    k = 1000  #To tweak later on
-    delta_q = .2 #To tweak later on
-
-    def rrt(q_init, q_goal, k, delta_q):
-        G = [(None,q_init)]
-        for count in range(k):
-            q_rand = RAND_CONF(robot, cube)
-            q_near_index = NEAREST_VERTEX(G,q_rand)
-            q_near = G[q_near_index][1]        
-            q_new = NEW_CONF(robot, q_near,q_rand,discretisationsteps_newconf, delta_q)
-            ADD_EDGE_AND_VERTEX(G,q_near_index,q_new)
-            if VALID_EDGE(q_new,q_goal,discretisationsteps_validedge):
-                print ("Path found!")
-                ADD_EDGE_AND_VERTEX(G,len(G)-1,q_goal)
-                return G, True
-            
-            print(count)
-            # print(q_new)
-            updatevisuals(viz, robot, cube, q_new)
-        print("path not found")
-        return G, False
-    
-    def getpath(G):
-        path = []
-        node = G[-1]
-        while node[0] is not None:
-            path = [node[1]] + path
-            node = G[node[0]]
-        path = [G[0][1]] + path
-        return path
-    
-    G, foundpath = rrt(qinit, qgoal, k, delta_q)
-
-    path = foundpath and getpath(G) or []
-
-    # print(path)
-
-    displaypath_tutorial(path)
-
-    # def sampleSpace(nbSamples=500):
-    #     '''
-    #     Sample nbSamples configurations and store them in two lists depending
-    #     if the configuration is in free space (hfree) or in collision (hcol), along
-    #     with the distance to the target and the distance to the obstacles.
-    #     '''
-    #     hcol = []
-    #     hfree = []
-    #     for i in range(nbSamples):
-    #         q = RAND_CONF(False)
-    #         if not collision(robot,q):
-    #             hfree.append( list(q.flat) + [ distance(q,qgoal), distanceToObstacle(robot,q) ])
-    #         else:
-    #             hcol.append(  list(q.flat) + [ distance(q,qgoal), 1e-2 ])
-    #     return hcol,hfree
-
-    # def plotConfigurationSpace(hcol,hfree,markerSize=20):
-    #     '''
-    #     Plot 2 "scatter" plots: the first one plot the distance to the target for 
-    #     each configuration, the second plots the distance to the obstacles (axis q1,q2, 
-    #     distance in the color space).
-    #     '''
-    #     htotal = hcol + hfree
-    #     h=np.array(htotal)
-    #     plt.subplot(2,1,1)
-    #     plt.scatter(h[:,0],h[:,1],c=h[:,2],s=markerSize,lw=0)
-    #     plt.title("Distance to the target")
-    #     plt.colorbar()
-    #     plt.subplot(2,1,2)
-    #     plt.scatter(h[:,0],h[:,1],c=h[:,3],s=markerSize,lw=0)
-    #     plt.title("Distance to the obstacles")
-    #     plt.colorbar()
-    #     plt.tight_layout(pad=0.8)
-    #     plt.show()
-
-    # hcol,hfree = sampleSpace(2000) #increase to improve resolution
-    # # print(hcol,hfree)
-    # plotConfigurationSpace(hcol,hfree)
-
-
-    return path
-
-# def getpath_to_node(G, node_idx):
-#     path = []
-#     node = G[node_idx]
-#     while node[0] is not None:
-#         path = [node[1]] + path
-#         node = G[node[0]]
-#     path = [G[0][1]] + path
-#     return path
-
 # #returns a collision free path from qinit to qgoal under grasping constraints
 # #the path is expressed as a list of configurations
 # def computepath(robot, qinit,qgoal,cubeplacementq0, cubeplacementqgoal):
@@ -226,41 +137,24 @@ def computepath(robot, qinit,qgoal,cubeplacementq0, cubeplacementqgoal):
 #     delta_q = .2 #To tweak later on
 
 #     def rrt(q_init, q_goal, k, delta_q):
-#         G_start = [(None,q_init)]
-#         G_goal = [(None,q_goal)]
-        
+#         G = [(None,q_init)]
+#         print('Computing path with RRT...')
 #         for count in range(k):
 #             q_rand = RAND_CONF(robot, cube)
-
-#             q_near_index_start = NEAREST_VERTEX(G_start,q_rand)
-#             q_near_start = G_start[q_near_index_start][1]        
-#             q_new_start = NEW_CONF(robot, q_near_start,q_rand,discretisationsteps_newconf, delta_q)
-            
-#             ADD_EDGE_AND_VERTEX(G_start,q_near_index_start,q_new_start)
-
-
-#             q_near_index_goal = NEAREST_VERTEX(G_goal,q_new_start)
-#             q_near_goal = G_goal[q_near_index_goal][1]
-#             q_new_goal = NEW_CONF(robot, q_near_goal,q_new_start,discretisationsteps_newconf, delta_q)
-
-#             ADD_EDGE_AND_VERTEX(G_goal,q_near_index_goal,q_new_goal)
-
-
-#             if VALID_EDGE(q_new_start,q_new_goal,discretisationsteps_validedge):
+#             q_near_index = NEAREST_VERTEX(G,q_rand)
+#             q_near = G[q_near_index][1]        
+#             q_new = NEW_CONF(robot, q_near,q_rand,discretisationsteps_newconf, delta_q)
+#             ADD_EDGE_AND_VERTEX(G,q_near_index,q_new)
+#             if VALID_EDGE(q_new,q_goal,discretisationsteps_validedge):
 #                 print ("Path found!")
-#                 path_start = getpath_to_node(G_start, len(G_start)-1)
-#                 path_goal  = getpath_to_node(G_goal, len(G_goal)-1)
-#                 path_goal.reverse()
-#                 return path_start + path_goal, True
+#                 ADD_EDGE_AND_VERTEX(G,len(G)-1,q_goal)
+#                 return G, True
             
-#             # if count % 2 == 0:
-#             #     G_start, G_goal = G_goal, G_start
-
 #             print(count)
 #             # print(q_new)
-#             updatevisuals(viz, robot, cube, q_new_start)
+#             updatevisuals(viz, robot, cube, q_new)
 #         print("path not found")
-#         return G_start, False
+#         return G, False
     
 #     def getpath(G):
 #         path = []
@@ -271,15 +165,127 @@ def computepath(robot, qinit,qgoal,cubeplacementq0, cubeplacementqgoal):
 #         path = [G[0][1]] + path
 #         return path
     
-#     path, foundpath = rrt(qinit, qgoal, k, delta_q)
+#     G, foundpath = rrt(qinit, qgoal, k, delta_q)
 
-#     # path = foundpath and getpath(G) or []
+#     path = foundpath and getpath(G) or []
 
+#     # print(path)
 
 #     displaypath_tutorial(path)
 
+#     # def sampleSpace(nbSamples=500):
+#     #     '''
+#     #     Sample nbSamples configurations and store them in two lists depending
+#     #     if the configuration is in free space (hfree) or in collision (hcol), along
+#     #     with the distance to the target and the distance to the obstacles.
+#     #     '''
+#     #     hcol = []
+#     #     hfree = []
+#     #     for i in range(nbSamples):
+#     #         q = RAND_CONF(False)
+#     #         if not collision(robot,q):
+#     #             hfree.append( list(q.flat) + [ distance(q,qgoal), distanceToObstacle(robot,q) ])
+#     #         else:
+#     #             hcol.append(  list(q.flat) + [ distance(q,qgoal), 1e-2 ])
+#     #     return hcol,hfree
+
+#     # def plotConfigurationSpace(hcol,hfree,markerSize=20):
+#     #     '''
+#     #     Plot 2 "scatter" plots: the first one plot the distance to the target for 
+#     #     each configuration, the second plots the distance to the obstacles (axis q1,q2, 
+#     #     distance in the color space).
+#     #     '''
+#     #     htotal = hcol + hfree
+#     #     h=np.array(htotal)
+#     #     plt.subplot(2,1,1)
+#     #     plt.scatter(h[:,0],h[:,1],c=h[:,2],s=markerSize,lw=0)
+#     #     plt.title("Distance to the target")
+#     #     plt.colorbar()
+#     #     plt.subplot(2,1,2)
+#     #     plt.scatter(h[:,0],h[:,1],c=h[:,3],s=markerSize,lw=0)
+#     #     plt.title("Distance to the obstacles")
+#     #     plt.colorbar()
+#     #     plt.tight_layout(pad=0.8)
+#     #     plt.show()
+
+#     # hcol,hfree = sampleSpace(2000) #increase to improve resolution
+#     # # print(hcol,hfree)
+#     # plotConfigurationSpace(hcol,hfree)
+
 
 #     return path
+
+def getpath_to_node(G, node_idx):
+    path = []
+    node = G[node_idx]
+    while node[0] is not None:
+        path = [node[1]] + path
+        node = G[node[0]]
+    path = [G[0][1]] + path
+    return path
+
+#returns a collision free path from qinit to qgoal under grasping constraints
+#the path is expressed as a list of configurations
+def computepath(robot, qinit,qgoal,cubeplacementq0, cubeplacementqgoal):
+
+    discretisationsteps_newconf = 200 #To tweak later on
+    discretisationsteps_validedge = 200 #To tweak later on
+    k = 1000  #To tweak later on
+    delta_q = .2 #To tweak later on
+
+    def rrt(q_init, q_goal, k, delta_q):
+        G_start = [(None,q_init)]
+        G_goal = [(None,q_goal)]
+        
+        for count in range(k):
+            q_rand = RAND_CONF(robot, cube)
+
+            q_near_index_start = NEAREST_VERTEX(G_start,q_rand)
+            q_near_start = G_start[q_near_index_start][1]        
+            q_new_start = NEW_CONF(robot, q_near_start,q_rand,discretisationsteps_newconf, delta_q)
+            
+            ADD_EDGE_AND_VERTEX(G_start,q_near_index_start,q_new_start)
+            
+            q_near_index_goal = NEAREST_VERTEX(G_goal,q_rand)
+            q_near_goal = G_goal[q_near_index_goal][1]
+            q_new_goal = NEW_CONF(robot, q_near_goal,q_rand,discretisationsteps_newconf, delta_q)
+
+            ADD_EDGE_AND_VERTEX(G_goal,q_near_index_goal,q_new_goal)
+
+            if VALID_EDGE(q_new_start,q_new_goal,discretisationsteps_validedge):
+                print ("Path found!")
+                path_start = getpath_to_node(G_start, len(G_start)-1)
+                path_goal  = getpath_to_node(G_goal, len(G_goal)-1)
+                path_goal.reverse()
+                return path_start + path_goal, True
+            
+            # if count % 2 == 0:
+            #     G_start, G_goal = G_goal, G_start
+
+            print(count)
+            # print(q_new)
+            updatevisuals(viz, robot, cube, q_new_goal)
+        print("path not found")
+        return G_start, False
+    
+    def getpath(G):
+        path = []
+        node = G[-1]
+        while node[0] is not None:
+            path = [node[1]] + path
+            node = G[node[0]]
+        path = [G[0][1]] + path
+        return path
+    
+    path, foundpath = rrt(qinit, qgoal, k, delta_q)
+
+    # path = foundpath and getpath(G) or []
+
+
+    displaypath_tutorial(path)
+
+
+    return path
 
 
 def displaypath(robot,path,dt,viz):
