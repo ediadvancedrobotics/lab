@@ -44,6 +44,8 @@ def computeqgrasppose(robot, qcurrent, cube, cubetarget, viz=None):
     
     if q_solution is not None:
         return q_solution, True
+    
+
 
     return robot.q0, False
 
@@ -101,7 +103,7 @@ def solve_dual_ik_3d(robot, left_target_pose, right_target_pose, left_frame_id, 
 
         # Check convergence
         if error_norm < tolerance:
-            print(f"Dual-hand IK converged in {i+1} iterations with error {error_norm:.4f}")
+            # print(f"Dual-hand IK converged in {i+1} iterations with error {error_norm:.4f}")
             return q
         
         # Get Jacobians for both hands
@@ -170,16 +172,16 @@ def solve_dual_ik_3d(robot, left_target_pose, right_target_pose, left_frame_id, 
             q = q + step_size * dq
             q = projecttojointlimits(robot, q)
         
-        # Visualize progress
-        if viz is not None and i % 1 == 0:
-            viz.display(q)
-            time.sleep(0.02)
+        # # Visualize progress
+        # if viz is not None and i % 1 == 0:
+        #     viz.display(q)
+        #     time.sleep(0.02)
     
-    print(f"Dual-hand IK failed to converge after {max_iterations} iterations")
+    # print(f"Dual-hand IK failed to converge after {max_iterations} iterations")
     # print(f"Final error: {error_norm:.4f}")
     
     # Return best solution found so far if it's reasonable
-    print(f"Best error norm achieved: {best_error_norm:.4f}")
+    # print(f"Best error norm achieved: {best_error_norm:.4f}")
     return best_q if best_error_norm < tolerance * 5 else None
 
     
