@@ -34,7 +34,7 @@ git clone https://github.com/ediadvancedrobotics/lab/
 - Install dependencies
 
 ```bash
-python -m pip install -r requirements.txt
+cd aro lab && python -m pip install -r requirements.txt
 ```    
 
 - You need to update `.bashrc` to include meshcat-server in PATH. Follow the steps below:
