@@ -8,6 +8,16 @@ These instructions are very similar to the [tutorials instructions](https://gith
 
 ## Set up 
 
+Use Python 3.11. From the cloned `lab` directory, run:
+
+```bash
+conda env update --file=environment.yml
+conda activate aro2026
+```
+
+This creates `aro2026` if it is missing, or updates the environment used for the
+tutorials. The lab can also be installed independently. Select `aro2026` as your notebook kernel.
+
 ### On a DICE machine
 On DICE, we will clone the [lab repository](https://github.com/ediadvancedrobotics/lab) and install the required [dependencies](https://github.com/ediadvancedrobotics/lab/blob/main/requirements.txt). 
 You can "clone" the project to a local folder of your choice.
@@ -34,30 +44,21 @@ git clone https://github.com/ediadvancedrobotics/lab/
 - Install dependencies
 
 ```bash
-cd aro lab && python -m pip install -r requirements.txt
+cd lab
+conda env update -f environment.yml
+conda activate aro2026
 ```    
 
-- You need to update `.bashrc` to include meshcat-server in PATH. Follow the steps below:
-    - Open .bashrc for Editing
-        ```bash
-        nano ~/.bashrc
-        ```
-    - Add the Following Line to the end of your .bashrc file
-        ```bash
-        export PATH=$PATH:~/.local/bin
-        ```
-    - Save and close by pressing CTRL + O to save, followed by CTRL + X to exit.
-    - Reload `.bashrc` to apply the changes immediately without restarting the terminal
-        ```bash
-        source ~/.bashrc
-        ```
+Activating the environment also puts `meshcat-server` on PATH; no `.bashrc` edits
+are needed.
 
 
 You should be done! See [below](#using-and-updating-the-notebooks) to check that your installation is working 
 
 ### Linux, Python 3, PyPI
 
-On a Linux system with Python 3.8, you can get the dependencies directly with +[pip (see installation procedure and update below)](#installing-pip):
+On a Linux system with Python 3.11 and PyBullet already installed (for example via
+the Conda setup above), install the remaining dependencies with +[pip (see installation procedure and update below)](#installing-pip):
 ```bash
 python3 -m pip install -r requirements.txt
 ```
@@ -103,4 +104,3 @@ python3 -m pip install --upgrade --user
 ```
 
 In general, running +pip is likely to run an alias on +pip in /usr, so either run it through python3 as explained above, or make sure your path select the right pip executable in your ~/.local. The option --user is kind of optional for recent +pip version, but removing it should work with a warning.
-
