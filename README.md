@@ -4,19 +4,9 @@ These instructions are written for ARO labs regarding set up on DICE environment
 
 The lab instructions are given in the instructions notebook. 
 This readme provides you with the instructions for installing the lab requirements.
-These instructions are very similar to the [tutorials instructions](https://github.com/ediadvancedrobotics/tutorials).
+**These instructions assume that you have already run the [tutorials instructions](https://github.com/ediadvancedrobotics/tutorials).** Note that the lab includes an additional dependency to the pybullet package. 
 
-## Set up 
-
-Use Python 3.11. From the cloned `lab` directory, run:
-
-```bash
-conda env update --file=environment.yml
-conda activate aro2026
-```
-
-This creates `aro2026` if it is missing, or updates the environment used for the
-tutorials. The lab can also be installed independently. Select `aro2026` as your notebook kernel.
+## Set up - Python 3.11
 
 ### On a DICE machine
 On DICE, we will clone the [lab repository](https://github.com/ediadvancedrobotics/lab) and install the required [dependencies](https://github.com/ediadvancedrobotics/lab/blob/main/requirements.txt). 
@@ -62,11 +52,12 @@ the Conda setup above), install the remaining dependencies with +[pip (see insta
 ```bash
 python3 -m pip install -r requirements.txt
 ```
-NB: you should consider using a [virtualenv](https://docs.python.org/3/library/venv.html)
 
-Once you have the dependencies, you can start the server with `jupyter notebook`
+Once you have the dependencies, you can start the server with `jupyter notebook .`
 
 ## Using and updating the repository
+You **must** create [a local fork](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/fork-a-repo) of the repository on your github account to be able to save and commit your changes to the project.
+
 ### Running the instructions notebook
 On your terminal, cd into the lab folder:
 ```bash
@@ -84,8 +75,8 @@ There is a pinocchio cheat sheet available as a pdf. You can also run the notebo
 Pinocchio is a bit dense and has its own singular API, it might take some time for you to become familiar with it, but trust me, this will prove largely beneficial.
 
 ### Editing the notebook and updates
-If the repository changes (for example when the second part of the lab will be pushed / a bug has been found), you will need to update your local
-version by "pulling" it from the repository. On a native installation, just go in the folder containing the tutorials and execute ```git pull```
+If the repository changes (for example if a bug has been found and corrected by the ARO staff), you will need to update your local
+version by "pulling" it from the repository. On a native installation, just go in the folder containing the lab and execute ```git pull```
 
 
 ## Side notes
