@@ -25,10 +25,10 @@ cd ~
 mkdir -p aro && cd aro
 ```
 
-- Clone the lab inside your home directory.
+- Clone the lab inside your home directory and cd into the folder
 
 ```bash 
-git clone https://github.com/ediadvancedrobotics/lab/
+git clone https://github.com/ediadvancedrobotics/lab/ && cd lab
 ```
 
 - Install dependencies
