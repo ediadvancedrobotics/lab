@@ -18,9 +18,48 @@ from tools import setcubeplacement
 def computeqgrasppose(robot, qcurrent, cube, cubetarget, viz=None):
     '''Return a collision free configuration grasping a cube at a specific location and a success flag'''
     setcubeplacement(robot, cube, cubetarget)
-    #TODO implement
-    print ("TODO: implement me")
-    return robot.q0, False
+    DT = 1e-1  
+    q = qcurrent.copy() 
+
+    idL = robot.model.getFrameId(LEFT_HAND)               
+    idR = robot.model.getFrameId(RIGHT_HAND)
+    oMhookL = getcubeplacement(cube, LEFT_HOOK)           
+    oMhookR = getcubeplacement(cube, RIGHT_HOOK)
+
+    for i in range(1000):
+        pin.framesForwardKinematics(robot.model,robot.data,q)
+        pin.computeJointJacobians(robot.model,robot.data,q) 
+
+        oMhandL = robot.data.oMf[idL]
+        oMhandR = robot.data.oMf[idR] 
+
+        ## Hand L task  
+        o_handl = pin.computeFrameJacobian(robot.model, robot.data, q, idL,pin.LOCAL)
+        handltoMgoal = oMhandL.inverse()* oMhookL 
+        handl_nu = pin.log(handltoMgoal).vector
+
+        # HandR task
+        o_handr = pin.computeFrameJacobian(robot.model,robot.data,q,idR,pin.LOCAL)
+        handrtoMgoal = oMhandR.inverse()* oMhookR
+        handr_nu = pin.log(handrtoMgoal).vector
+
+        if norm(handl_nu) < EPSILON and norm(handr_nu) < EPSILON:                 
+            break
+
+        vq = pinv(o_handl) @ handl_nu
+        Ptool = np.eye(robot.nv)-pinv(o_handl) @ o_handl
+        vq += pinv(o_handr @ Ptool) @ (handr_nu - o_handr @ vq)
+
+        q = pin.integrate(robot.model,q, vq * DT)
+        q = projecttojointlimits(robot, q)
+        
+        if viz is not None:
+            viz.display(q)
+        
+    success = (norm(handl_nu) < EPSILON and norm(handr_nu) < EPSILON
+            and not collision(robot, q))
+    return q, success
+
             
 if __name__ == "__main__":
     from tools import setupwithmeshcat
